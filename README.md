@@ -19,6 +19,8 @@ AWS API Gateway and Lambda provide a powerful serverless architecture for buildi
 
 - [API Gateway Guidelines](api_gateway.md) - Comprehensive best practices for AWS API Gateway V1 (REST API) configuration with Terraform
 - [Lambda Guidelines](lambda.md) - Best practices for AWS Lambda function deployment and management using Terraform
+  - [Java with Spring Boot Lambda Guidelines](java_lambda.md) - Specific guidelines for Java with Spring Boot Lambda functions
+  - [Python Lambda Guidelines](python_lambda.md) - Specific guidelines for Python Lambda functions
 
 ### Supporting Documentation
 

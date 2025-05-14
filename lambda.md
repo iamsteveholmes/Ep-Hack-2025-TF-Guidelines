@@ -12,6 +12,7 @@ This document outlines the best practices for deploying and managing AWS Lambda 
 - [Cost Optimization](#cost-optimization)
 - [Integration with API Gateway](#integration-with-api-gateway)
 - [Common Patterns and Examples](#common-patterns-and-examples)
+- [Language-Specific Guidelines](#language-specific-guidelines)
 
 ## Basic Lambda Configuration
 
@@ -501,3 +502,31 @@ For more information on integrating Lambda with other AWS services, refer to the
 - [API Gateway Integration](api_gateway.md)
 - [IAM Best Practices](iam.md)
 - [Monitoring and Observability](monitoring.md)
+
+## Language-Specific Guidelines
+
+EpsiHack primarily uses Java with Spring Boot and Python for Lambda functions. The following language-specific guidelines provide detailed information on developing and deploying Lambda functions using these languages:
+
+### Java with Spring Boot
+
+The [Java Lambda Guidelines](java_lambda.md) document provides comprehensive guidance for developing AWS Lambda functions using Java with Spring Boot, including:
+
+- Development environment setup
+- Spring Boot configuration for Lambda
+- Handler implementation patterns
+- Dependency management and packaging
+- Testing strategies
+- Performance optimization for Java Lambdas
+- Common patterns and examples
+
+### Python
+
+The [Python Lambda Guidelines](python_lambda.md) document provides detailed guidance for developing AWS Lambda functions using Python, including:
+
+- Development environment setup
+- Project structure
+- Handler implementation patterns
+- Dependency management and packaging
+- Testing strategies
+- Performance optimization for Python Lambdas
+- Common patterns and examples
