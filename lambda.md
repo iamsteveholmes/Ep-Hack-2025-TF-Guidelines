@@ -1,3 +1,10 @@
+---
+title: "AWS Lambda Terraform Best Practices"
+category: "Lambda"
+tags: ["aws", "lambda", "terraform", "serverless", "best practices"]
+last_updated: "2025-05-14"
+---
+
 # AWS Lambda Terraform Best Practices
 
 This document outlines the best practices for deploying and managing AWS Lambda functions using Terraform. Following these guidelines will help ensure your Lambda functions are secure, maintainable, and cost-effective.

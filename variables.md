@@ -1,3 +1,10 @@
+---
+title: "Variables Management Best Practices for Terraform AWS Projects"
+category: "Terraform"
+tags: ["aws", "terraform", "variables", "best practices", "infrastructure as code"]
+last_updated: "2025-05-14"
+---
+
 # Variables Management Best Practices for Terraform AWS Projects
 
 This document outlines the best practices for managing variables in Terraform projects, particularly for AWS API Gateway and Lambda deployments. Following these guidelines will help ensure your Terraform configurations are maintainable, reusable, and properly organized.

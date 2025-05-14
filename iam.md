@@ -1,3 +1,10 @@
+---
+title: "IAM Best Practices for AWS API Gateway and Lambda with Terraform"
+category: "Security"
+tags: ["aws", "iam", "api gateway", "lambda", "terraform", "security", "best practices"]
+last_updated: "2025-05-14"
+---
+
 # IAM Best Practices for AWS API Gateway and Lambda with Terraform
 
 This document outlines the best practices for creating and managing IAM roles and policies for AWS API Gateway and Lambda using Terraform. Following these guidelines will help ensure your serverless applications are secure and follow the principle of least privilege.
@@ -24,7 +31,7 @@ Always grant the minimum permissions necessary for a resource to perform its fun
 resource "aws_iam_policy" "overly_permissive" {
   name        = "overly-permissive-policy"
   description = "Grants too many permissions"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -39,7 +46,7 @@ resource "aws_iam_policy" "overly_permissive" {
 resource "aws_iam_policy" "properly_scoped" {
   name        = "properly-scoped-policy"
   description = "Grants only necessary permissions"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -65,7 +72,7 @@ For services like Lambda and API Gateway, always use IAM roles instead of IAM us
 # Create a role for Lambda execution
 resource "aws_iam_role" "lambda_execution_role" {
   name = "${var.project_name}-${var.environment}-lambda-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -76,16 +83,16 @@ resource "aws_iam_role" "lambda_execution_role" {
       }
     }]
   })
-  
+
   # Optional: Add a description
   description = "IAM role for Lambda function execution"
-  
+
   # Optional: Add path for organizational purposes
   path = "/service-roles/lambda/"
-  
+
   # Optional: Add permission boundary
   # permissions_boundary = aws_iam_policy.boundary.arn
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -108,7 +115,7 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 resource "aws_iam_policy" "lambda_logging" {
   name        = "${var.project_name}-${var.environment}-lambda-logging"
   description = "IAM policy for logging from a Lambda"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -136,7 +143,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 ```hcl
 resource "aws_iam_role" "lambda_execution_role" {
   name = "${var.project_name}-${var.environment}-lambda-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -153,7 +160,7 @@ resource "aws_iam_role" "lambda_execution_role" {
 resource "aws_iam_policy" "lambda_logging" {
   name        = "${var.project_name}-${var.environment}-lambda-logging"
   description = "IAM policy for logging from a Lambda"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -180,7 +187,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 resource "aws_iam_policy" "lambda_dynamodb" {
   name        = "${var.project_name}-${var.environment}-lambda-dynamodb"
   description = "IAM policy for Lambda to access DynamoDB"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -213,7 +220,7 @@ resource "aws_iam_role_policy_attachment" "lambda_dynamodb" {
 resource "aws_iam_policy" "lambda_s3" {
   name        = "${var.project_name}-${var.environment}-lambda-s3"
   description = "IAM policy for Lambda to access S3"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -244,7 +251,7 @@ resource "aws_iam_role_policy_attachment" "lambda_s3" {
 resource "aws_iam_policy" "lambda_vpc" {
   name        = "${var.project_name}-${var.environment}-lambda-vpc"
   description = "IAM policy for Lambda to access VPC"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -273,7 +280,7 @@ resource "aws_iam_role_policy_attachment" "lambda_vpc" {
 resource "aws_iam_policy" "lambda_xray" {
   name        = "${var.project_name}-${var.environment}-lambda-xray"
   description = "IAM policy for Lambda to use X-Ray tracing"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -300,7 +307,7 @@ resource "aws_iam_role_policy_attachment" "lambda_xray" {
 ```hcl
 resource "aws_iam_role" "api_gateway_cloudwatch" {
   name = "${var.project_name}-${var.environment}-api-cloudwatch-role"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -316,7 +323,7 @@ resource "aws_iam_role" "api_gateway_cloudwatch" {
 resource "aws_iam_policy" "api_gateway_logging" {
   name        = "${var.project_name}-${var.environment}-api-logging"
   description = "IAM policy for API Gateway to write logs to CloudWatch"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -351,7 +358,7 @@ resource "aws_api_gateway_account" "main" {
 ```hcl
 resource "aws_iam_role" "api_gateway_lambda_invocation" {
   name = "${var.project_name}-${var.environment}-api-lambda-invocation"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -367,7 +374,7 @@ resource "aws_iam_role" "api_gateway_lambda_invocation" {
 resource "aws_iam_policy" "lambda_invocation" {
   name        = "${var.project_name}-${var.environment}-lambda-invocation"
   description = "IAM policy for API Gateway to invoke Lambda"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -392,7 +399,7 @@ resource "aws_iam_role_policy_attachment" "lambda_invocation" {
 resource "aws_iam_policy" "lambda_sns" {
   name        = "${var.project_name}-${var.environment}-lambda-sns"
   description = "IAM policy for Lambda to publish to SNS"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -406,7 +413,7 @@ resource "aws_iam_policy" "lambda_sns" {
 resource "aws_iam_policy" "lambda_sqs" {
   name        = "${var.project_name}-${var.environment}-lambda-sqs"
   description = "IAM policy for Lambda to send/receive SQS messages"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -425,7 +432,7 @@ resource "aws_iam_policy" "lambda_sqs" {
 resource "aws_iam_policy" "lambda_secrets_manager" {
   name        = "${var.project_name}-${var.environment}-lambda-secrets"
   description = "IAM policy for Lambda to access Secrets Manager"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -442,7 +449,7 @@ resource "aws_iam_policy" "lambda_secrets_manager" {
 ```hcl
 resource "aws_iam_role" "lambda_cross_account" {
   name = "${var.project_name}-${var.environment}-lambda-cross-account"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -458,7 +465,7 @@ resource "aws_iam_role" "lambda_cross_account" {
 resource "aws_iam_policy" "assume_role_policy" {
   name        = "${var.project_name}-${var.environment}-assume-role"
   description = "IAM policy for Lambda to assume a role in another account"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -485,7 +492,7 @@ resource "aws_lambda_permission" "api_gateway" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.example.function_name
   principal     = "apigateway.amazonaws.com"
-  
+
   # Restrict to specific API Gateway
   source_arn = "${aws_api_gateway_rest_api.example.execution_arn}/*/*"
 }
@@ -543,7 +550,7 @@ variable "resources" {
 resource "aws_iam_policy" "dynamodb_read" {
   name        = "${var.project_name}-${var.environment}-dynamodb-read"
   description = "IAM policy for read-only access to DynamoDB"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -563,7 +570,7 @@ resource "aws_iam_policy" "dynamodb_read" {
 resource "aws_iam_policy" "dynamodb_read_write" {
   name        = "${var.project_name}-${var.environment}-dynamodb-read-write"
   description = "IAM policy for read-write access to DynamoDB"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -587,7 +594,7 @@ resource "aws_iam_policy" "dynamodb_read_write" {
 resource "aws_iam_policy" "s3_read" {
   name        = "${var.project_name}-${var.environment}-s3-read"
   description = "IAM policy for read-only access to S3"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -623,7 +630,7 @@ Usage:
 ```hcl
 module "iam_policies" {
   source = "./modules/iam_policies"
-  
+
   project_name = var.project_name
   environment  = var.environment
   resources = {
@@ -646,7 +653,7 @@ resource "aws_iam_role_policy_attachment" "lambda_dynamodb_read" {
 resource "aws_iam_policy" "s3_secure_transport" {
   name        = "${var.project_name}-${var.environment}-s3-secure-transport"
   description = "IAM policy for S3 access with secure transport"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -672,7 +679,7 @@ resource "aws_iam_policy" "s3_secure_transport" {
 resource "aws_iam_policy" "permission_boundary" {
   name        = "${var.project_name}-permission-boundary"
   description = "Permission boundary for all roles in the project"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -730,10 +737,10 @@ resource "aws_iam_user" "api_user" {
 
 resource "aws_iam_access_key" "api_user" {
   user = aws_iam_user.api_user.name
-  
+
   # Set to true to deactivate the access key
   # status = "Inactive"
-  
+
   # Use lifecycle to enforce rotation
   lifecycle {
     create_before_destroy = true
@@ -743,7 +750,7 @@ resource "aws_iam_access_key" "api_user" {
 # Store access key securely in Secrets Manager
 resource "aws_secretsmanager_secret" "api_credentials" {
   name = "${var.project_name}/${var.environment}/api-credentials"
-  
+
   # Automatically rotate every 90 days
   rotation_lambda_arn = aws_lambda_function.rotate_credentials.arn
   rotation_rules {
@@ -771,16 +778,16 @@ resource "aws_cloudtrail" "main" {
   include_global_service_events = true
   is_multi_region_trail         = true
   enable_log_file_validation    = true
-  
+
   event_selector {
     read_write_type           = "All"
     include_management_events = true
-    
+
     data_resource {
       type   = "AWS::Lambda::Function"
       values = ["arn:aws:lambda"]
     }
-    
+
     data_resource {
       type   = "AWS::S3::Object"
       values = ["${aws_s3_bucket.example.arn}/"]
@@ -804,7 +811,7 @@ resource "aws_accessanalyzer_analyzer" "main" {
 resource "aws_config_config_rule" "iam_user_no_policies_check" {
   name        = "iam-user-no-policies-check"
   description = "Checks that IAM users do not have policies attached"
-  
+
   source {
     owner             = "AWS"
     source_identifier = "IAM_USER_NO_POLICIES_CHECK"
@@ -814,7 +821,7 @@ resource "aws_config_config_rule" "iam_user_no_policies_check" {
 resource "aws_config_config_rule" "iam_root_access_key_check" {
   name        = "iam-root-access-key-check"
   description = "Checks that the root user does not have access keys"
-  
+
   source {
     owner             = "AWS"
     source_identifier = "IAM_ROOT_ACCESS_KEY_CHECK"

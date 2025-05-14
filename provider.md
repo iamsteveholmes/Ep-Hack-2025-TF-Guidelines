@@ -1,3 +1,10 @@
+---
+title: "AWS Provider Configuration Best Practices for Terraform"
+category: "Terraform"
+tags: ["aws", "terraform", "provider", "state management", "security", "best practices"]
+last_updated: "2025-05-14"
+---
+
 # AWS Provider Configuration Best Practices for Terraform
 
 This document outlines the best practices for configuring the AWS provider in Terraform projects, particularly for API Gateway and Lambda deployments. Following these guidelines will help ensure your Terraform configurations are secure, maintainable, and follow infrastructure as code best practices.
@@ -20,10 +27,10 @@ This document outlines the best practices for configuring the AWS provider in Te
 ```hcl
 provider "aws" {
   region = var.aws_region
-  
+
   # Optional: Specify the AWS profile to use
   profile = var.aws_profile
-  
+
   # Default tags applied to all resources
   default_tags {
     tags = {
@@ -38,7 +45,7 @@ provider "aws" {
 # Specify required Terraform and provider versions
 terraform {
   required_version = ">= 1.0.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -108,7 +115,7 @@ provider "aws" {
 ```hcl
 provider "aws" {
   region = var.aws_region
-  
+
   assume_role {
     role_arn     = "arn:aws:iam::123456789012:role/TerraformExecutionRole"
     session_name = "terraform-session"
@@ -122,7 +129,7 @@ provider "aws" {
 ```hcl
 provider "aws" {
   region = var.aws_region
-  
+
   assume_role_with_web_identity {
     role_arn                = "arn:aws:iam::123456789012:role/TerraformWebIdentityRole"
     session_name            = "terraform-session"
@@ -154,12 +161,12 @@ resource "aws_dynamodb_table" "terraform_locks" {
   name         = "terraform-locks"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
-  
+
   attribute {
     name = "LockID"
     type = "S"
   }
-  
+
   tags = {
     Name = "Terraform State Lock Table"
   }
@@ -171,12 +178,12 @@ resource "aws_dynamodb_table" "terraform_locks" {
 ```hcl
 resource "aws_s3_bucket" "terraform_state" {
   bucket = "terraform-state-bucket"
-  
+
   # Enable versioning to keep history of state files
   versioning {
     enabled = true
   }
-  
+
   # Enable server-side encryption
   server_side_encryption_configuration {
     rule {
@@ -190,7 +197,7 @@ resource "aws_s3_bucket" "terraform_state" {
 # Block public access
 resource "aws_s3_bucket_public_access_block" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
-  
+
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -200,7 +207,7 @@ resource "aws_s3_bucket_public_access_block" "terraform_state" {
 # Bucket policy to enforce encryption and secure transport
 resource "aws_s3_bucket_policy" "terraform_state" {
   bucket = aws_s3_bucket.terraform_state.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -259,11 +266,11 @@ terraform {
 ```hcl
 module "us_east_1_deployment" {
   source = "./modules/api_gateway_lambda"
-  
+
   providers = {
     aws = aws.us_east_1
   }
-  
+
   environment = "prod"
   region_name = "us-east-1"
   # ... other variables ...
@@ -271,11 +278,11 @@ module "us_east_1_deployment" {
 
 module "us_west_2_deployment" {
   source = "./modules/api_gateway_lambda"
-  
+
   providers = {
     aws = aws.us_west_2
   }
-  
+
   environment = "prod"
   region_name = "us-west-2"
   # ... other variables ...
@@ -291,7 +298,7 @@ locals {
     "us-west-2" = "usw2"
     # ... other regions ...
   }
-  
+
   resource_prefix = "${var.project_name}-${var.environment}-${lookup(local.region_code, var.aws_region)}"
 }
 
@@ -309,7 +316,7 @@ resource "aws_lambda_function" "example" {
 provider "aws" {
   alias  = "dev"
   region = var.aws_region
-  
+
   assume_role {
     role_arn     = "arn:aws:iam::${var.dev_account_id}:role/TerraformExecutionRole"
     session_name = "terraform-dev-session"
@@ -319,7 +326,7 @@ provider "aws" {
 provider "aws" {
   alias  = "prod"
   region = var.aws_region
-  
+
   assume_role {
     role_arn     = "arn:aws:iam::${var.prod_account_id}:role/TerraformExecutionRole"
     session_name = "terraform-prod-session"
@@ -334,7 +341,7 @@ provider "aws" {
 resource "aws_iam_role" "cross_account_role" {
   provider = aws.prod
   name     = "CrossAccountAccessRole"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -352,7 +359,7 @@ resource "aws_iam_role_policy" "cross_account_policy" {
   provider = aws.prod
   name     = "CrossAccountAccessPolicy"
   role     = aws_iam_role.cross_account_role.id
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -391,7 +398,7 @@ locals {
       instance_type = "t3.medium"
     }
   }
-  
+
   # Use workspace-specific configuration or default to "default" workspace
   config = lookup(local.workspace_config, terraform.workspace, local.workspace_config["default"])
 }
@@ -403,7 +410,7 @@ provider "aws" {
 # Use the workspace-specific configuration
 resource "aws_instance" "example" {
   instance_type = local.config.instance_type
-  
+
   tags = {
     Environment = local.config.environment
   }
@@ -444,7 +451,7 @@ Create a dedicated IAM role for Terraform with only the permissions needed:
 resource "aws_iam_policy" "terraform_policy" {
   name        = "TerraformExecutionPolicy"
   description = "Policy for Terraform execution"
-  
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -471,7 +478,7 @@ resource "aws_iam_policy" "terraform_policy" {
 
 resource "aws_iam_role" "terraform_role" {
   name = "TerraformExecutionRole"
-  
+
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -516,11 +523,11 @@ resource "aws_iam_role_policy_attachment" "terraform_policy_attachment" {
    data "aws_secretsmanager_secret" "db_password" {
      name = "db/password"
    }
-   
+
    data "aws_secretsmanager_secret_version" "db_password" {
      secret_id = data.aws_secretsmanager_secret.db_password.id
    }
-   
+
    locals {
      db_password = jsondecode(data.aws_secretsmanager_secret_version.db_password.secret_string)["password"]
    }
@@ -534,12 +541,12 @@ resource "aws_iam_role_policy_attachment" "terraform_policy_attachment" {
    ```hcl
    provider "aws" {
      region = var.aws_region
-     
+
      assume_role {
        role_arn    = var.role_arn
        session_name = "terraform-session"
        external_id  = var.external_id
-       
+
        # MFA configuration
        serial_number = var.mfa_serial
        token_code    = var.mfa_token

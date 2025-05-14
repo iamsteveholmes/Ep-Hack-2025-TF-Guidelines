@@ -1,3 +1,10 @@
+---
+title: "Python Lambda Guidelines for AWS"
+category: "Lambda"
+tags: ["python", "aws", "terraform", "serverless"]
+last_updated: "2025-05-14"
+---
+
 # Python Lambda Guidelines for AWS
 
 This document outlines the best practices for developing and deploying AWS Lambda functions using Python and Terraform. These guidelines are specifically tailored for EpsiHack's Python-based serverless applications.
@@ -122,20 +129,20 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event, context):
     """
     Basic Lambda handler function
-    
+
     Parameters:
     - event: The event data
     - context: The Lambda context object
-    
+
     Returns:
     - API Gateway response object
     """
     logger.info(f"Received event: {json.dumps(event)}")
-    
+
     try:
         # Process the event
         result = process_event(event)
-        
+
         # Return successful response
         return {
             'statusCode': 200,
@@ -149,7 +156,7 @@ def lambda_handler(event, context):
         }
     except Exception as e:
         logger.error(f"Error processing event: {str(e)}")
-        
+
         # Return error response
         return {
             'statusCode': 500,
@@ -188,10 +195,10 @@ app = APIGatewayRestResolver()
 def get_users():
     # Log with structured keys
     logger.info("Fetching all users")
-    
+
     # Add custom metrics
     metrics.add_metric(name="UsersRetrieved", unit=MetricUnit.Count, value=1)
-    
+
     # Return response
     return {"users": ["user1", "user2"]}
 
@@ -199,10 +206,10 @@ def get_users():
 def get_user(user_id):
     # Log with structured keys
     logger.info(f"Fetching user", extra={"user_id": user_id})
-    
+
     # Add custom metrics
     metrics.add_metric(name="UserRetrieved", unit=MetricUnit.Count, value=1)
-    
+
     # Return response
     return {"user_id": user_id, "name": "Example User"}
 
@@ -324,10 +331,10 @@ def test_lambda_handler_success():
     # Mock event and context
     event = {"test": "data"}
     context = {}
-    
+
     # Call the handler
     response = lambda_handler(event, context)
-    
+
     # Verify the response
     assert response["statusCode"] == 200
     body = json.loads(response["body"])
@@ -338,20 +345,20 @@ def test_lambda_handler_error():
     # Mock event and context
     event = {"test": "data"}
     context = {}
-    
+
     # Mock process_event to raise an exception
     def mock_process_event(event):
         raise Exception("Test error")
-    
+
     # Patch the process_event function
     import src.handlers.api_handler
     original_process_event = src.handlers.api_handler.process_event
     src.handlers.api_handler.process_event = mock_process_event
-    
+
     try:
         # Call the handler
         response = lambda_handler(event, context)
-        
+
         # Verify the response
         assert response["statusCode"] == 500
         body = json.loads(response["body"])
@@ -392,14 +399,14 @@ def dynamodb_table():
 def test_save_and_get_item(dynamodb_table):
     # Initialize the service
     service = DynamoDBService(table_name='users')
-    
+
     # Save an item
     user = {'user_id': '123', 'name': 'Test User', 'email': 'test@example.com'}
     service.save_item(user)
-    
+
     # Get the item
     retrieved_user = service.get_item('user_id', '123')
-    
+
     # Verify the item was saved and retrieved correctly
     assert retrieved_user['user_id'] == '123'
     assert retrieved_user['name'] == 'Test User'
@@ -449,9 +456,9 @@ resource "aws_lambda_function" "python_function" {
   runtime          = "python3.9"
   memory_size      = 256
   timeout          = 30
-  
+
   role = aws_iam_role.lambda_execution_role.arn
-  
+
   environment {
     variables = {
       ENVIRONMENT = var.environment
@@ -460,18 +467,18 @@ resource "aws_lambda_function" "python_function" {
       POWERTOOLS_METRICS_NAMESPACE = "${var.project_name}"
     }
   }
-  
+
   # Enable X-Ray tracing
   tracing_config {
     mode = "Active"
   }
-  
+
   # Configure VPC if needed
   vpc_config {
     subnet_ids         = var.subnet_ids
     security_group_ids = [aws_security_group.lambda_sg.id]
   }
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -486,9 +493,9 @@ resource "aws_lambda_function" "python_function" {
 resource "aws_lambda_layer_version" "python_dependencies" {
   layer_name = "${var.project_name}-${var.environment}-python-dependencies"
   filename   = "../python_dependencies.zip"
-  
+
   compatible_runtimes = ["python3.9"]
-  
+
   source_code_hash = filebase64sha256("../python_dependencies.zip")
 }
 
@@ -506,18 +513,18 @@ resource "aws_lambda_function" "python_container_function" {
   function_name = "${var.project_name}-${var.environment}-python-container"
   package_type  = "Image"
   image_uri     = "${aws_ecr_repository.lambda_repo.repository_url}:latest"
-  
+
   role = aws_iam_role.lambda_execution_role.arn
-  
+
   # Configure memory and timeout
   memory_size = 512
   timeout     = 30
-  
+
   # Enable X-Ray tracing
   tracing_config {
     mode = "Active"
   }
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -543,7 +550,7 @@ resource "aws_lambda_function" "python_container_function" {
    ```bash
    # Use a tool like lambda-packages to reduce size
    pip install lambda-packages
-   
+
    # Or use a tool like serverless-python-requirements
    npm install --save serverless-python-requirements
    ```
@@ -578,7 +585,7 @@ def lambda_handler(event, context):
     if event.get('warmer', False):
         print("Warming function")
         return {"warmed": True}
-    
+
     # Regular handler logic
     # ...
 ```
@@ -602,7 +609,7 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event, context):
     # Create a request ID
     request_id = event.get('requestContext', {}).get('requestId', str(uuid.uuid4()))
-    
+
     # Log with structured data
     logger.info(json.dumps({
         'request_id': request_id,
@@ -613,10 +620,10 @@ def lambda_handler(event, context):
         'path': event.get('path'),
         'method': event.get('httpMethod')
     }))
-    
+
     # Process the request
     # ...
-    
+
     # Log completion
     logger.info(json.dumps({
         'request_id': request_id,
@@ -624,7 +631,7 @@ def lambda_handler(event, context):
         'timestamp': time.time(),
         'duration_ms': (time.time() - start_time) * 1000
     }))
-    
+
     return {
         'statusCode': 200,
         'body': json.dumps({'message': 'Success'})
@@ -648,15 +655,15 @@ def lambda_handler(event, context):
         "path": event.get("path"),
         "method": event.get("httpMethod")
     })
-    
+
     # Log with append_keys for persistent keys
     logger.append_keys(user_id="123456")
     logger.info("User context added")
-    
+
     # Log different levels
     logger.debug("Debug information")
     logger.warning("Warning message")
-    
+
     try:
         # Business logic
         result = process_event(event)
@@ -681,21 +688,21 @@ metrics = Metrics(namespace="MyApplication")
 def lambda_handler(event, context):
     # Add default dimensions
     metrics.add_dimension(name="environment", value="prod")
-    
+
     # Add metrics
     metrics.add_metric(name="ProcessedItems", unit=MetricUnit.Count, value=1)
-    
+
     # Process items
     items = event.get('items', [])
     for item in items:
         process_item(item)
         # Add more metrics
         metrics.add_metric(name="ItemProcessingTime", unit=MetricUnit.Milliseconds, value=item.get('processing_time', 0))
-    
+
     # Add metrics with custom dimensions
     metrics.add_dimension(name="function_version", value=context.function_version)
     metrics.add_metric(name="SuccessfulInvocations", unit=MetricUnit.Count, value=1)
-    
+
     return {
         'statusCode': 200,
         'body': json.dumps({'processed': len(items)})
@@ -719,11 +726,11 @@ def lambda_handler(event, context):
     Handler for API Gateway events
     """
     logger.info(f"Received API Gateway event: {json.dumps(event)}")
-    
+
     # Get path and method
     path = event.get('path', '')
     http_method = event.get('httpMethod', '')
-    
+
     # Route the request
     if path == '/users' and http_method == 'GET':
         return get_users(event)
@@ -743,10 +750,10 @@ def get_users(event):
     # Get query parameters
     query_params = event.get('queryStringParameters', {}) or {}
     limit = int(query_params.get('limit', 10))
-    
+
     # Get users from database
     # ...
-    
+
     return {
         'statusCode': 200,
         'headers': {'Content-Type': 'application/json'},
@@ -756,7 +763,7 @@ def get_users(event):
 def get_user(user_id, event):
     # Get user from database
     # ...
-    
+
     return {
         'statusCode': 200,
         'headers': {'Content-Type': 'application/json'},
@@ -773,7 +780,7 @@ def create_user(event):
             'headers': {'Content-Type': 'application/json'},
             'body': json.dumps({'error': 'Invalid JSON in request body'})
         }
-    
+
     # Validate request
     if 'name' not in body:
         return {
@@ -781,10 +788,10 @@ def create_user(event):
             'headers': {'Content-Type': 'application/json'},
             'body': json.dumps({'error': 'Missing required field: name'})
         }
-    
+
     # Create user in database
     # ...
-    
+
     return {
         'statusCode': 201,
         'headers': {'Content-Type': 'application/json'},
@@ -806,7 +813,7 @@ class DynamoDBService:
     def __init__(self, table_name):
         self.dynamodb = boto3.resource('dynamodb')
         self.table = self.dynamodb.Table(table_name)
-    
+
     def get_item(self, key_name, key_value):
         """
         Get an item from DynamoDB
@@ -819,7 +826,7 @@ class DynamoDBService:
         except ClientError as e:
             logger.error(f"Error getting item from DynamoDB: {str(e)}")
             raise
-    
+
     def save_item(self, item):
         """
         Save an item to DynamoDB
@@ -832,7 +839,7 @@ class DynamoDBService:
         except ClientError as e:
             logger.error(f"Error saving item to DynamoDB: {str(e)}")
             raise
-    
+
     def query_items(self, key_name, key_value, index_name=None):
         """
         Query items from DynamoDB
@@ -844,10 +851,10 @@ class DynamoDBService:
                     ':value': key_value
                 }
             }
-            
+
             if index_name:
                 params['IndexName'] = index_name
-            
+
             response = self.table.query(**params)
             return response.get('Items', [])
         except ClientError as e:
@@ -871,37 +878,37 @@ def lambda_handler(event, context):
     Handler for SQS events
     """
     logger.info(f"Received SQS event with {len(event['Records'])} records")
-    
+
     processed_records = 0
     failed_records = 0
-    
+
     for record in event['Records']:
         try:
             # Extract message body
             message_body = record['body']
             logger.info(f"Processing message", extra={"messageId": record['messageId']})
-            
+
             # Parse JSON if needed
             try:
                 message_data = json.loads(message_body)
             except json.JSONDecodeError:
                 logger.warning(f"Message is not valid JSON", extra={"messageId": record['messageId']})
                 message_data = message_body
-            
+
             # Process the message
             process_message(message_data)
-            
+
             processed_records += 1
             logger.info(f"Successfully processed message", extra={"messageId": record['messageId']})
         except Exception as e:
             failed_records += 1
             logger.exception(f"Error processing message", extra={"messageId": record['messageId']})
-    
+
     logger.info(f"Completed processing SQS batch", extra={
         "processed_records": processed_records,
         "failed_records": failed_records
     })
-    
+
     return {
         "processed_records": processed_records,
         "failed_records": failed_records
@@ -933,27 +940,27 @@ def lambda_handler(event, context):
     Handler for S3 events
     """
     logger.info(f"Received S3 event with {len(event['Records'])} records")
-    
+
     for record in event['Records']:
         # Get bucket and key
         bucket = record['s3']['bucket']['name']
         key = urllib.parse.unquote_plus(record['s3']['object']['key'])
-        
+
         logger.info(f"Processing S3 object", extra={"bucket": bucket, "key": key})
-        
+
         try:
             # Get the object
             response = s3_client.get_object(Bucket=bucket, Key=key)
             content = response['Body'].read().decode('utf-8')
-            
+
             # Process the content
             process_s3_object(bucket, key, content)
-            
+
             logger.info(f"Successfully processed S3 object", extra={"bucket": bucket, "key": key})
         except Exception as e:
             logger.exception(f"Error processing S3 object", extra={"bucket": bucket, "key": key})
             raise
-    
+
     return {
         "statusCode": 200,
         "body": json.dumps({"message": "Successfully processed S3 event"})

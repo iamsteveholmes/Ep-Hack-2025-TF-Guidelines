@@ -1,3 +1,10 @@
+---
+title: "Java with Spring Boot Lambda Guidelines for AWS"
+category: "Lambda"
+tags: ["java", "spring boot", "aws", "terraform", "serverless"]
+last_updated: "2025-05-14"
+---
+
 # Java with Spring Boot Lambda Guidelines for AWS
 
 This document outlines the best practices for developing and deploying AWS Lambda functions using Java with Spring Boot and Terraform. These guidelines are specifically tailored for EpsiHack's Java-based serverless applications.
@@ -94,7 +101,7 @@ import org.springframework.context.annotation.Configuration;
 
 @SpringBootApplication
 public class Application {
-    
+
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
@@ -141,11 +148,11 @@ public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
         context.getLogger().log("Received event: " + input);
-        
+
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
         response.setStatusCode(200);
         response.setBody("Hello from Spring Boot Lambda!");
-        
+
         return response;
     }
 }
@@ -187,33 +194,33 @@ public Function<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> handl
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter</artifactId>
     </dependency>
-    
+
     <!-- AWS Lambda Core -->
     <dependency>
         <groupId>com.amazonaws</groupId>
         <artifactId>aws-lambda-java-core</artifactId>
         <version>1.2.2</version>
     </dependency>
-    
+
     <!-- AWS Lambda Events -->
     <dependency>
         <groupId>com.amazonaws</groupId>
         <artifactId>aws-lambda-java-events</artifactId>
         <version>3.11.1</version>
     </dependency>
-    
+
     <!-- Spring Cloud Function (Optional) -->
     <dependency>
         <groupId>org.springframework.cloud</groupId>
         <artifactId>spring-cloud-function-adapter-aws</artifactId>
     </dependency>
-    
+
     <!-- JSON Processing -->
     <dependency>
         <groupId>com.fasterxml.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
     </dependency>
-    
+
     <!-- Testing -->
     <dependency>
         <groupId>org.springframework.boot</groupId>
@@ -237,7 +244,7 @@ public Function<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> handl
                 <mainClass>com.epsihack.Application</mainClass>
             </configuration>
         </plugin>
-        
+
         <!-- Maven Shade Plugin for creating an uber-jar -->
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
@@ -339,17 +346,17 @@ public class LambdaHandlerTest {
 
     @Autowired
     private LambdaHandler handler;
-    
+
     @MockBean
     private Context context;
-    
+
     @Test
     public void testHandleRequest() {
         APIGatewayProxyRequestEvent request = new APIGatewayProxyRequestEvent();
         request.setBody("{}");
-        
+
         APIGatewayProxyResponseEvent response = handler.handleRequest(request, context);
-        
+
         assertEquals(200, response.getStatusCode());
         assertEquals("Hello from Spring Boot Lambda!", response.getBody());
     }
@@ -398,27 +405,27 @@ resource "aws_lambda_function" "java_function" {
   runtime          = "java11"
   memory_size      = 512
   timeout          = 30
-  
+
   role = aws_iam_role.lambda_execution_role.arn
-  
+
   environment {
     variables = {
       ENVIRONMENT = var.environment
       LOG_LEVEL   = var.environment == "prod" ? "INFO" : "DEBUG"
     }
   }
-  
+
   # Enable X-Ray tracing
   tracing_config {
     mode = "Active"
   }
-  
+
   # Configure VPC if needed
   vpc_config {
     subnet_ids         = var.subnet_ids
     security_group_ids = [aws_security_group.lambda_sg.id]
   }
-  
+
   tags = {
     Environment = var.environment
     Project     = var.project_name
@@ -434,9 +441,9 @@ resource "aws_lambda_function" "java_function" {
 resource "aws_lambda_layer_version" "java_dependencies" {
   layer_name = "${var.project_name}-${var.environment}-java-dependencies"
   filename   = "../layers/java-dependencies.zip"
-  
+
   compatible_runtimes = ["java11"]
-  
+
   source_code_hash = filebase64sha256("../layers/java-dependencies.zip")
 }
 
@@ -506,17 +513,17 @@ import org.slf4j.LoggerFactory;
 
 public class LambdaHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private static final Logger logger = LoggerFactory.getLogger(LambdaHandler.class);
-    
+
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
         logger.info("Processing request: {}", input);
-        
+
         // Business logic
-        
+
         if (error) {
             logger.error("Error processing request: {}", error.getMessage(), error);
         }
-        
+
         logger.info("Request processed successfully");
         return response;
     }
@@ -535,22 +542,22 @@ import com.amazonaws.services.cloudwatch.model.StandardUnit;
 
 public class MetricsService {
     private final AmazonCloudWatch cloudWatch = AmazonCloudWatchClientBuilder.defaultClient();
-    
+
     public void recordMetric(String metricName, double value, String unit) {
         Dimension dimension = new Dimension()
             .withName("Environment")
             .withValue(System.getenv("ENVIRONMENT"));
-            
+
         MetricDatum datum = new MetricDatum()
             .withMetricName(metricName)
             .withUnit(unit)
             .withValue(value)
             .withDimensions(dimension);
-            
+
         PutMetricDataRequest request = new PutMetricDataRequest()
             .withNamespace("EpsiHack/Lambda")
             .withMetricData(datum);
-            
+
         cloudWatch.putMetricData(request);
     }
 }
@@ -562,22 +569,22 @@ public class MetricsService {
 
 ```java
 public class ApiGatewayHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
-    
+
     @Autowired
     private ObjectMapper objectMapper;
-    
+
     @Autowired
     private UserService userService;
-    
+
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
         response.setHeaders(Map.of("Content-Type", "application/json"));
-        
+
         try {
             String path = input.getPath();
             String httpMethod = input.getHttpMethod();
-            
+
             if ("/users".equals(path) && "GET".equals(httpMethod)) {
                 List<User> users = userService.getAllUsers();
                 response.setStatusCode(200);
@@ -585,7 +592,7 @@ public class ApiGatewayHandler implements RequestHandler<APIGatewayProxyRequestE
             } else if (path.matches("/users/\\d+") && "GET".equals(httpMethod)) {
                 String userId = path.substring(path.lastIndexOf('/') + 1);
                 User user = userService.getUserById(userId);
-                
+
                 if (user != null) {
                     response.setStatusCode(200);
                     response.setBody(objectMapper.writeValueAsString(user));
@@ -601,7 +608,7 @@ public class ApiGatewayHandler implements RequestHandler<APIGatewayProxyRequestE
             response.setStatusCode(500);
             response.setBody("{\"error\":\"Internal server error\"}");
         }
-        
+
         return response;
     }
 }
@@ -611,10 +618,10 @@ public class ApiGatewayHandler implements RequestHandler<APIGatewayProxyRequestE
 
 ```java
 public class SQSEventHandler implements RequestHandler<SQSEvent, Void> {
-    
+
     @Autowired
     private MessageProcessor messageProcessor;
-    
+
     @Override
     public Void handleRequest(SQSEvent event, Context context) {
         for (SQSEvent.SQSMessage message : event.getRecords()) {
@@ -635,34 +642,34 @@ public class SQSEventHandler implements RequestHandler<SQSEvent, Void> {
 ```java
 @Service
 public class DynamoDBService {
-    
+
     private final DynamoDbClient dynamoDbClient;
     private final String tableName;
-    
+
     public DynamoDBService() {
         this.dynamoDbClient = DynamoDbClient.builder().build();
         this.tableName = System.getenv("DYNAMODB_TABLE");
     }
-    
+
     public void saveItem(Map<String, AttributeValue> item) {
         PutItemRequest request = PutItemRequest.builder()
             .tableName(tableName)
             .item(item)
             .build();
-            
+
         dynamoDbClient.putItem(request);
     }
-    
+
     public Map<String, AttributeValue> getItem(String partitionKey, String partitionValue) {
         Map<String, AttributeValue> key = Map.of(
             partitionKey, AttributeValue.builder().s(partitionValue).build()
         );
-        
+
         GetItemRequest request = GetItemRequest.builder()
             .tableName(tableName)
             .key(key)
             .build();
-            
+
         GetItemResponse response = dynamoDbClient.getItem(request);
         return response.item();
     }
@@ -673,10 +680,10 @@ public class DynamoDBService {
 
 ```java
 public class ScheduledTaskHandler implements RequestHandler<ScheduledEvent, Void> {
-    
+
     @Autowired
     private TaskService taskService;
-    
+
     @Override
     public Void handleRequest(ScheduledEvent event, Context context) {
         context.getLogger().log("Executing scheduled task at: " + event.getTime());

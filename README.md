@@ -1,3 +1,10 @@
+---
+title: "Terraform Best Practices for AWS API Gateway V1 and Lambda"
+category: "Terraform"
+tags: ["aws", "api gateway", "lambda", "terraform", "best practices"]
+last_updated: "2025-05-14"
+---
+
 # Terraform Best Practices for AWS API Gateway V1 and Lambda
 
 This repository contains comprehensive guidelines and best practices for deploying AWS API Gateway (REST API) and Lambda functions using Terraform. These documents serve as corporate standards for infrastructure as code implementation.

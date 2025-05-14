@@ -1,3 +1,10 @@
+---
+title: "Terraform Outputs Best Practices for AWS API Gateway and Lambda"
+category: "Terraform"
+tags: ["aws", "api gateway", "lambda", "terraform", "outputs", "documentation"]
+last_updated: "2025-05-14"
+---
+
 # Terraform Outputs Best Practices for AWS API Gateway and Lambda
 
 This document outlines the best practices for defining and managing outputs in Terraform projects, particularly for AWS API Gateway and Lambda deployments. Following these guidelines will help ensure your Terraform configurations are well-documented, maintainable, and provide useful information to users of your modules.
@@ -252,7 +259,7 @@ output "api_gateway_endpoint" {
   description = <<-EOT
     The invoke URL for the API Gateway deployment. This URL can be used to access the API.
     Format: https://{api-id}.execute-api.{region}.amazonaws.com/{stage-name}
-    
+
     Example usage:
     ```
     curl -X GET "${api_gateway_endpoint}/items"
@@ -351,7 +358,7 @@ resource "aws_api_gateway_integration" "lambda_integration" {
 output "api_gateway_endpoint" {
   description = "Endpoint URL of the API Gateway"
   value       = "${aws_api_gateway_deployment.main.invoke_url}${aws_api_gateway_stage.main.stage_name}"
-  
+
   # Ensure the output is only available after the deployment is complete
   depends_on = [
     aws_api_gateway_deployment.main,

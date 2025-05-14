@@ -1,3 +1,10 @@
+---
+title: "Monitoring and Observability Best Practices for AWS API Gateway and Lambda"
+category: "Monitoring"
+tags: ["aws", "api gateway", "lambda", "terraform", "cloudwatch", "x-ray", "observability"]
+last_updated: "2025-05-14"
+---
+
 # Monitoring and Observability Best Practices for AWS API Gateway and Lambda with Terraform
 
 This document outlines the best practices for implementing monitoring and observability for AWS API Gateway and Lambda functions using Terraform. Following these guidelines will help ensure your serverless applications are properly monitored, allowing you to detect and resolve issues quickly.
